@@ -1,0 +1,335 @@
+<html>
+    <head>
+        <title>How to Create a Windows System Tray Application in Python</title>
+        <link rel="stylesheet" href="css/main.css">
+        <link rel="stylesheet" href="css/font-awesome.min.css">
+    </head>
+    <body>
+        <h1>Creating a Windows System Tray Application in Python</h1>
+        <img src="Resources/recording.gif" alt="Demo gif of System Tray Icon being used" height="400">
+        <p>Often, when making an application, it is useful to be able to relegate it to the system tray 
+            so that it isn't cluttering your screen when it's not being used, but is still ready when you need it.
+            In this tutorial, I will demonstrate how to create a basic system tray icon that you can use to
+            easily control your application. This could be used in a small application that you want to run in the background without
+            cluttering the screen, or to have your application open when the computer boots up, and put itself in the system tray
+            so that it can monitor the system. If you follow along with the steps given, you will have a small system tray icon
+            that reveals and hides a blank window, which you can then modify to control your application.  We'll create two main classes,
+            one that creates a window, one that creates the system tray application that controls that window. We'll design a menu that the user can interact with, and 
+            handle the events returned by that menu.
+            Let's get started.
+        </p>
+        
+       
+       
+        <h2>Installing and Importing Required Libraries</h2>
+       
+        <p>For this guide, we will be using the <b>WxPython</b> library.
+        It can easily be installed through typing the following pip command into a cmd window: <b>"pip install wx"</b></p>
+        <p>You will then need to import the modules shown below:</p>
+        
+        
+        <img src="Resources/1.png" alt="Code that cannot easily be explained in alt text. The full program in text will be at the bottom of the page">
+        
+        <p>In previous versions of WxPython, all of the functions required for this tutorial were included in the Wx module, but to decrease unnecessary imports, Wx modules that are less frequently used have been moved to the wx.adv module. We will need some of the functionality of wx.adv to interact with the system tray, so we install both modules.
+        </p>
+        
+        <p>At this point, we will define the tooltip for the system tray application, as well as the icon you wish to use. 
+            The tooltip is what will appear when the user hovers over your icon. Fill in the following with the values you require:</p>
+        
+        <img src="Resources/2.png" alt="Image of Code"><p></p><br>
+        
+
+
+        <h2>What is WxPython?</h2>
+        <p>As its own <a href="https://wxpython.org/pages/overview/index.html">website</a> puts it: "<i>wxPython is a cross-platform GUI toolkit for the Python programming language. It allows Python programmers to 
+            create programs with a robust, highly functional graphical user interface, simply and easily.</i>"</p>
+            <p>WxPython is a python library for creating GUIs. It runs on any platform, which is useful because it prevents you from having to rewrite code for different platforms.
+                Part of the reason that this tutorial is using WxPython is because it uses native Windows elements wherever possible,
+                making our job easier, as it simplifies the code that we have to write, as Windows handles the complexity of 
+                interacting with the system tray.
+
+            </p>
+
+
+
+        <h2>Creating a TaskBarIcon Class</h2>
+
+        <p>In this step, we will define the class that will be used to create our system tray object. The class definition and constructor are defined as below:</p>
+
+        <img src="Resources/3.png" alt="Image of Code"><br>
+        <p>   </p><br><p>   </p>
+        
+        <p>Let's walk through walk this section is doing, step by step:</p><br>
+
+        <img src="Resources/4.png" alt="Image of Code">
+
+        <p>As we are defining a class to create and manipulate system tray objects, we will need the functionality of the wx.adv.TaskBarIcon, and so here we tell the program that this is a subclass of wx.adv.TaskBarIcon.</p><br>
+        <br>
+        <img src="Resources/5.png" alt="Image of Code">
+        
+        <p>Here, we assign the frame that the TaskBarIcon will display when the maximise button(which we will look at later on) is pressed. Initially, this will be a null reference, as we create a frame when maximise is pressed for the first time, as we will see later on. (A frame in WxPython is the same as a window in most other libraries and languages) As this is a subclass, we must call the constructor of the superclass using the super().__init__()  function.
+        </p><br>
+        <br>
+        <img src="Resources/6.png" alt="Image of Code">
+
+        <p>This line looks for a valid image at the path we specified in step 1, to use as an icon for the taskbar object. We will define the set_icon method <a href="#seticon">later on</a> in the program.</p><br>
+        <br>
+        <img src="Resources/7.png" alt="Image of Code">
+
+        <p>This line binds the on_left_down function(we will define this <a href="#leftclick">later</a>), to the event that occurs when the TaskBar Icon is left clicked.</p><br>
+        <br>
+        <img src="Resources/8.png" alt="Image of Code">
+
+        <p>"This attribute will be used to keep track of the number of open windows". We will use this to determine whether the program
+            should create a new window, or reveal and existing one when the maximise menu option is selected.
+        </p>
+
+
+
+        <h2>Creating a Popup Menu</h2>
+
+        <p>In this step, we will program the method of the TaskBarIcon class that creates the popup menu. This is the menu that 
+            appears when you right-click the system tray icon. The code for this is shown below:</p>
+
+        <img src="Resources/9.png" alt="Image of Code">
+
+        <p>This method creates the menu, and then populates it with options that trigger the methods we will need. Again, we will step through this in sections:</p><br>
+        <br>
+        <img src="Resources/10.png" alt="Image of Code">
+
+        <p>This line creates our menu object.</p><br>
+        <br>
+        <img src="Resources/11.png" alt="Image of Code">
+
+        <p>This populates the menu with an option labelled “Maximise”, and sets it to trigger the “self.on_hello()” method when clicked. The on_hello() method reveals our window to the user. This function, “create_menu_item()” will be defined <a href="#create">later on in the program</a></p><br>
+        <br>
+        <img src="Resources/12.png" alt="Image of Code">
+
+        <p>This places a separating line in the menu, to make it more asthetically pleasing, and to reduce misclicks by moving our options away from each other.</p><br>
+
+
+
+
+        <h2>Handling the Minimise Event</h2>
+
+        <p>In this step, we will define the on_min() method. This will be called when the user clicks minimise on the menu that we defined in the last step. The code is as follows:</p>
+
+        <img src="Resources/13.png" alt="Image of Code">
+
+        <p>All this method does is hide the frame(window) that the system tray object will control.</p>
+
+
+
+        <h2><a name="seticon"></a>Giving our Application an Icon</h2>
+
+        <p>We will now define the set_icon() method, which is responsible for finding and setting the icon that the System Tray object is to use.</p>
+        
+        <img src="Resources/14.png" alt="Image of Code">
+
+        <p>Here, we have passed the path to the image of the icon that we wish to use. The icon is found by passing the path to the wx.Icon method. We then call wx’s SetIcon method, which sets our image as the icon.</p>
+
+
+
+
+        <h2><a name="leftclick"></a>An Example of Event Binding</h2>
+
+        <p>To further demonstrate how events from the System Tray object can be bound to functions, we will now create the method called by <img src="Resources/15.png" alt="image of code previously coded"> that we coded previously as part of the constructor</p>
+        
+        <p>The code for this demo function is below:</p>
+        <img src="Resources/16.png" alt="Image of Code">
+
+
+
+
+        <h2>Revealing our Application Window</h2>
+
+        <p>The next method we will program is the on_hello() method, which we bound to the Maximise menu option in Step 3:</p>
+
+        <img src="Resources/17.png" alt="Image of Code">
+
+        <p>When actually programming a System Tray object, you do not need the print statement, it just makes debugging easier in this example, as it allows us to see whether the method is called when we click the menu item. You can also change the title variable to suit you, it is the title of the frame(window) that this method creates. </p><br>
+        <br>
+        <img src="Resources/18.png" alt="Image of Code">
+
+        <p>Here, we check whether any frames have already been created. If so, we don’t need to create a new frame, and so we just call the .Show() method of the frame that has already been created. If we have not created any frames, we will need to create a frame and assign it to our System Tray object. We do this by creating an object of the OtherFrame class, which we will program after we have finished creating our TaskBarIcon class. We then up the frame_number to 1, so that the next time we run this method, it won’t create a new frame, but will instead use the one we just created.</p>
+
+
+
+
+
+        <h2>Destroying the Application!!!</h2>
+
+        <p>We will now create the final method of this first class, which we will call on_exit(). This method is called by the Exit menu option. The code is below:</p>
+
+        <img src="Resources/19.png" alt="Image of Code">
+
+
+        <p>The wx.CallAfter() method waits for all pending events to finish, to ensure that everything that the program was told to do has been done. We have passed self.Destroy() as the function to be executed once all pending events are complete. There are two ways to terminate the System Tray object, self.Close() and self.Destroy(), but self.Close() can sometimes not fully terminate everything that it is supposed to, which could leave hanging code behind after the program is supposed to be finished. We call self.Destroy() instead, which does not have this issue. After this, we destroy the frame, which ends the program.</p>
+
+
+
+
+
+        <h2><a name="create"></a>Adding Items to Our Popup Menu</h2>
+
+        <p>Now that we have defined the entirety of our TaskBarIcon class, we will program the create_menu_item() function that we called in step 3. This function should be placed outside of the class definition(An example placement can be seen <a href="#fp">here</a>). The code for this is below:</p>
+
+        <img src="Resources/20.png" alt="Image of Code">
+
+        <p>This function adds an option to a menu by taking whatever label and function we pass to it, and creating an option with that label and function in the menu that we pass to it.</p><br>
+        <br>
+        <img src="Resources/21.png" alt="Image of Code">
+        <p>In this line, we create the MenuItem(the option we wish to put in the menu). We pass it three arguments. The first, menu, is the menu object we want to create an option for. The second is the ID that can be used to refer to our option. We have assigned the item with the ID -1. When this ID is passed to wx, it finds a free ID that is not being used by Windows, and assigns it to our item. This saves us the hassle of trying to find out which IDs are currently free. The third option, label, is the text that will be on the option.</p>
+        <br>
+        <img src="Resources/22.png" alt="Image of Code">
+        <p>This binds the method that we pass to this function to the EVT_MENU event. The EVT_MENU event is triggered when the user right-clicks on the TaskBar Icon. This means that when the Icon is right-clicked, this menu option is shown to the user. The “id=item.GetId()” argument makes sure that our menu option is linked to the event trigger. </p><br>
+        <br>
+        <img src="Resources/23.png" alt="Image of Code">
+
+        <p>These lines append the menu option to the menu, and then return it.</p>
+
+
+
+
+        <h2>A Class to Create a Window for the Application</h2>
+
+        <p>We will now define the class OtherFrame(), which is the frame that we control using the System Tray object. The code is below:</p>
+
+        <img src="Resources/24.png" alt="Image of Code">
+
+        <p>In this class, we create a constructor and call its superclass's constructor. We then call the .Show() method of the frame, revealing it to the user.</p>
+
+
+
+        <h2>Creating a Wx.App class</h2>
+
+        <p>The final class that we have to create is the App class, which is a subclass of wx.App. This class is required to initialise wxPython. The code is below:</p>
+
+        <img src="Resources/25.png" alt="Image of Code">
+
+        <p>This class contains a constructor. You may notice that this constructor is called OnInit(), rather than the standard way of creating a python constructor, __init__(). This is because wx has to perform tasks in the background to set itself up, and calling the OnInit() constructor allows it to do this. </p><br>
+        <br>
+        <img src="Resources/26.png" alt="Image of Code">
+
+        <p>This line creates the frame that the TaskBarIcon will exist within. Passing None to it tells wx that the frame has no parent window.</p><br>
+        <br>
+        <img src="Resources/27.png" alt="Image of Code">
+
+        <p>This sets the frame as the top window, which means it is used as the parent of dialogs that do not have an explicit parent window. This isn't particularly applicable to this example, but is including for completeness.</p>
+
+
+
+
+        <h2>Setting Up our Application</h2>
+
+        <p>In this step, we create the function that executes the program when it is called. It only takes 2 lines to do so, as follows:</p>
+
+        <img src="Resources/28.png" alt="Image of Code">
+
+        <p>Passing False to the App class tells the class not to redirect STERR and STDOUT, which means that you will still see error messages and your print statements in the console.</p>
+
+
+
+        <h2>Starting the Application</h2>
+
+        <p>The final step in this tutorial is to call our main function. The code to do this is below:</p>
+
+        <img src="Resources/29.png" alt="Image of Code">
+
+        <p>The line “if __name__ == ‘__main__’: will be true when this program is being run directly, rather than being imported as a library. This means that when you execute this program, it will start and create the System Tray application. If it is imported, it will not, allowing you to make use of the methods we have defined in whatever way you need to.</p>
+
+
+
+
+        <h2>Conclusion</h2>
+        <p>In this tutorial, we have defined a class for our system tray app. We have given it a menu, and bound methods to the menu items
+        to control the visibility of a blank window(which you can customise to suit your application). </p>
+        <p>If the steps have been followed correctly, you should now have a functioning System Tray Application. For reference, the entire program is below:</p>
+        <br>
+        <p><a name="fp"></a>
+            import wx.adv<br>
+            import wx<br>
+            TRAY_TOOLTIP = 'Name' <br>
+            TRAY_ICON = 'icon.png' <br>
+            <br>
+            <br>
+            def create_menu_item(menu, label, func):<br>
+                item = wx.MenuItem(menu, -1, label)<br>
+                menu.Bind(wx.EVT_MENU, func, id=item.GetId())<br>
+                menu.Append(item)<br>
+                return item<br>
+                <br>
+            class OtherFrame(wx.Frame): # This class inherits from the wx.Frame class<br>
+                def __init__(self, title, parent=None):<br>
+                    wx.Frame.__init__(self, parent=parent, title=title)<br>
+                    self.Show()<br>
+                    <br>
+            class TaskBarIcon(wx.adv.TaskBarIcon):<br>
+                def __init__(self, frame): <br>
+                    self.frame = frame <br>
+                    super(TaskBarIcon, self).__init__()  <br>
+                    self.set_icon(TRAY_ICON) <br>
+                    self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down) <br>
+                    self.frame_number = 0<br>
+                    <br>
+                def CreatePopupMenu(self):<br>
+                    menu = wx.Menu()<br>
+                    create_menu_item(menu, 'Maximise', self.on_hello)<br>
+                    menu.AppendSeparator()<br>
+                    create_menu_item(menu, 'Minimise', self.on_min)<br>
+                    menu.AppendSeparator()<br>
+                    create_menu_item(menu, 'Exit', self.on_exit)<br>
+                    return menu<br>
+                    <br>
+                def on_min(self, event):<br>
+                    self.frame.Show(False)<br>
+                    <br>
+                def set_icon(self, path):<br>
+                    icon = wx.Icon(path)<br>
+                    self.SetIcon(icon, TRAY_TOOLTIP)<br>
+                    <br>
+                def on_left_down(self, event):      <br>
+                    print ('Tray icon was left-clicked.')<br>
+                    <br>
+                def on_hello(self, event):<br>
+                    print ('Hello, world!')<br>
+                    title = "2nd"<br>
+                    if self.frame_number == 0:<br>
+                        self.frame = OtherFrame(title=title)<br>
+                        self.frame_number = 1<br>
+                    else:<br>
+                        self.frame.Show(True)<br>
+                        <br>
+                def on_exit(self, event):<br>
+                    wx.CallAfter(self.Destroy)<br>
+                    self.frame.Destroy()<br>
+                    <br>
+            class App(wx.App):<br>
+                def OnInit(self):<br>
+                    frame=wx.Frame(None)<br>
+                    self.SetTopWindow(frame)<br>
+                    TaskBarIcon(frame)<br>
+                    return True<br>
+                    <br>
+            def main():<br>
+                app = App(False)<br>
+                app.MainLoop()<br>
+                <br>
+                <br>
+            if __name__ == '__main__':<br>
+                main()<br>
+            </p>
+
+        <p>Sources: <br> <a href="https://stackoverflow.com/questions/6389580/quick-and-easy-trayicon-with-python?rq=1">https://stackoverflow.com/questions/6389580/quick-and-easy-trayicon-with-python?rq=1</a> <br> <a href="https://wxpython.org/Phoenix/docs/html/index.html">https://wxpython.org/Phoenix/docs/html/index.html</a> <br> <a href"https://stackoverflow.com/questions/21018324/oninit-and-init-in-wxpython">https://stackoverflow.com/questions/21018324/oninit-and-init-in-wxpython</a> <br> <a href="https://zetcode.com/wxpython/firststeps">https://zetcode.com/wxpython/firststeps/</a></p>
+    </div>
+        
+
+
+
+
+
+
+
+
+    </body>
+</html>
