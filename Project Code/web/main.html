@@ -1,0 +1,39 @@
+<html>
+    <head>
+        <title>My Page</title>
+        <!--Import Google Icon Font-->
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <!--Import materialize.css-->
+      <link type="text/css" rel="stylesheet" href="css/materialize.min.css"  media="screen,projection"/>
+
+      <!--Let browser know website is optimized for mobile-->
+      <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <script type="text/javascript" src="/eel.js"></script>
+        <script>
+            async function startInitialScan() {
+                var name_of_program = document.getElementById("programName").value;
+                if (name_of_program!="" && name_of_program!=null){
+                    let value = await eel.triggerFileScan(name_of_program)();
+                    alert(value);
+                }
+                else{
+                    alert("Please enter a valid program name");
+                }
+            }
+            async function startRegScan() {
+                alert("Starting Process")
+                let value = await eel.terminate_file_scan_and_start_registry_scan()();
+                alert(value);
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+        <p>Input the name of the program: <input type="text" id="programName"/></p>
+        <button class="center-align waves-effect waves-light btn" onclick="startInitialScan()">Click to begin File Scan</button>
+        <button class="center-align waves-effect waves-light btn" onclick="startRegScan()">Click to begin Registry Scan</button>
+        </div>
+        <!--JavaScript at end of body for optimized loading-->
+      <script type="text/javascript" src="js/materialize.min.js"></script>
+    </body>
+<html>
